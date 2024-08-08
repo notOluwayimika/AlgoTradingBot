@@ -1,0 +1,11 @@
+{
+    "mt5": {
+        "username":"51909439",
+        "password": "S@Xbpzy2tNw3x4",
+        "server": "ICMarketsSC-Demo",
+        "mt5.pathway":"C:/Program Files/MetaTrader 5 IC Markets Global/terminal64.exe",
+        "symbols":["EURUSD"],
+        "timeframe":"M30",
+        "pip_size":0.01
+    }
+}

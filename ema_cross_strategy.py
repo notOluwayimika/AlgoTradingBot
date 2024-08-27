@@ -21,7 +21,7 @@ def get_data(symbol, timeframe):
         data = mt5_lib.get_candlesticks(
             symbol = symbol,
             timeframe= timeframe,
-            number_of_candlesticks= 1000
+            number_of_candlesticks= 5000
         )
         if data.empty:
             logging.warning(f"No data retrieved for {symbol} on {timeframe}")
@@ -41,7 +41,6 @@ def hybrid_strategy(symbol, timeframe):
     account_info = mt5.account_info()
     account_balance = account_info.balance
     leverage = account_info.leverage
-    print(f"account balance is: {account_balance}")
     
     #fetch recent market data
     # rates = mt5.copy_rates_from_pos(symbol, timeframe, 0, 1000)
@@ -51,28 +50,29 @@ def hybrid_strategy(symbol, timeframe):
     #Calculate indicators for hybrid strategy
     
     # 1. EMA Crossover
-    df['EMA_short'] = df['close'].ewm(span=12, adjust=False).mean()
-    df['EMA_long'] = df['close'].ewm(span=26, adjust=False).mean()
+    df['EMA_short'] = ta.EMA(df['close'], timeperiod=12)
+    df['EMA_long'] = ta.EMA(df['close'], timeperiod=26)
 
     # 2. MACD Crossover
-    df['MACD'] = df['EMA_short'] - df['EMA_long']
-    df['Signal'] = df['MACD'].ewm(span=9, adjust=False).mean()
+    df['MACD'], df['Signal'], _ = ta.MACD(df['close'], fastperiod=12, slowperiod=26, signalperiod=9)
 
     # 3. RSI
-    delta = df['close'].diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
-    rs = gain / loss
-    df['RSI'] = 100 - (100 / (1 + rs))
+    df['RSI'] = ta.RSI(df['close'], timeperiod=14)
+    
+    # Bollinger Bands
+    df['upper_band'], df['middle_band'], df['lower_band'] = ta.BBANDS(df['close'], timeperiod=20, nbdevup=2, nbdevdn=2, matype=0)
+
+    # Stochastic Oscillator
+    df['slowk'], df['slowd'] = ta.STOCH(df['high'], df['low'], df['close'], fastk_period=14, slowk_period=3, slowk_matype=0, slowd_period=3, slowd_matype=0)
     
     buy_signal = (
-    df['EMA_short'].iloc[-1] > df['EMA_long'].iloc[-1] and
+    df['EMA_short'].iloc[-1] > df['EMA_long'].iloc[-1] or
     df['MACD'].iloc[-1] > df['Signal'].iloc[-1] and
     df['RSI'].iloc[-1] < 50
     )
 
     sell_signal = (
-        df['EMA_short'].iloc[-1] < df['EMA_long'].iloc[-1] and
+        df['EMA_short'].iloc[-1] < df['EMA_long'].iloc[-1] or
         df['MACD'].iloc[-1] < df['Signal'].iloc[-1] and
         df['RSI'].iloc[-1] > 50
     )
@@ -87,7 +87,7 @@ def hybrid_strategy(symbol, timeframe):
         stop_loss_direction = 1
         take_profit_direction = -1
     else:
-        print("No clear trading signal")
+        logging.info("No clear trading signal")
         return
     
     
@@ -146,6 +146,8 @@ def hybrid_strategy(symbol, timeframe):
             logging.info(f"Order failed, retcode={result.retcode}")
         else:
             logging.info("Order executed successfully")
+            
+        return account_balance
         
     
 

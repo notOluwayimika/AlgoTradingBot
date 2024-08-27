@@ -1,8 +1,8 @@
 import MetaTrader5 as mt5
 import pandas
 import logging
-
 # Function to Start Metatrader 5
+
 def start_mt5(project_settings):
     """
         # Function to start metatrader 5
@@ -19,6 +19,8 @@ def start_mt5(project_settings):
     mt5_pathway = project_settings['mt5']['mt5Pathway']
     mt5_pathway = str(mt5_pathway)
 
+    
+    
     #Attempt to initialize MT5
     mt5_init = False
     try:
@@ -31,7 +33,7 @@ def start_mt5(project_settings):
 
     #handle any errors
     except Exception as e:
-        print(f"Error initializing Metatrader 5: {e}")
+        logging.info(f"Error initializing Metatrader 5: {e}")
         #return false
         mt5_init = False
 
@@ -47,7 +49,7 @@ def start_mt5(project_settings):
             )
             #Handle exception
         except Exception as e:
-            print(f"Error logging into MetaTrader 5: {e}")
+            logging.info(f"Error logging into MetaTrader 5: {e}")
             mt5_login = False
 
     #Return the outcome to the user
@@ -59,6 +61,8 @@ def start_mt5(project_settings):
     #Default outcome
     return [False] 
 
+def get_balance():
+    return balance
 #function to initialize symbol
 def initialize_symbol(symbol):
     """
@@ -80,10 +84,10 @@ def initialize_symbol(symbol):
             mt5.symbol_select(symbol, True) #Arguments cant be declaresd here
             return True
         except Exception as e:
-            print(f"Error enabling {symbol}. Error: {e}")
+            logging.info(f"Error enabling {symbol}. Error: {e}")
             return False
     else: 
-        print(f"Symbol {symbol} doesn't not exist on this version")  
+        logging.info(f"Symbol {symbol} doesn't not exist on this version")  
         return False  
     
 #function to query historic candlesticks data from MT5
@@ -158,13 +162,13 @@ def set_query_timeframe(timeframe):
     elif timeframe == "MN1":
         return mt5.TIMEFRAME_MN1
     else:
-        print(f"Incorrect timeframe provided. {timeframe}")
+        logging.info(f"Incorrect timeframe provided. {timeframe}")
         raise ValueError("Input the correct timeframe")
     
 #function to place an order on metatrader 5
 def place_order(order_type, symbol, volume, stop_loss, take_profit, comment, stop_price, direct=False):
     #options are sell_stop/ buy_stop
-    print("Placing order")
+    logging.info("Placing order")
 
     #make sure volume, stop_loss, take_profit and stop prices are in the correct format
     volume = float(volume)
@@ -215,28 +219,28 @@ def place_order(order_type, symbol, volume, stop_loss, take_profit, comment, sto
         order_result = mt5.order_send(request)
         #notify based on the return outcomes
         if order_result[0] == 10009:
-            print(f"Order for {symbol} successful")
+            logging.info(f"Order for {symbol} successful")
             return order_result[2]
         #Notify the user if autotrading has been left on in metatrader 5
         elif order_result[0] ==10027:
-            print("Turn off AlgoTrading on MT5 Terminal")
+            logging.info("Turn off AlgoTrading on MT5 Terminal")
             raise Exception("Turn off ALgo Trading on MT5 terminal")
         elif order_result[0] == 10015:
-            print(f"invalid price for {symbol}. Price: {stop_price}")
+            logging.info(f"invalid price for {symbol}. Price: {stop_price}")
         elif order_result[0] == 10016:
-            print(f"Invalid stops for {symbol}. Stop Loss: {stop_loss}")
+            logging.info(f"Invalid stops for {symbol}. Stop Loss: {stop_loss}")
         elif order_result[0] == 10014:
-            print(f"Invalid volume for {symbol}. Volume: {volume}")
+            logging.info(f"Invalid volume for {symbol}. Volume: {volume}")
         #default
         else:
-            print(f"Error logging order for {symbol}, Error code: {order_result[0]} Order Details: {order_result}")
+            logging.info(f"Error logging order for {symbol}, Error code: {order_result[0]} Order Details: {order_result}")
             raise Exception(f"Unknown error logging order for symbol {symbol}")
     else:
         #Check the order
         result = mt5.order_check(request)
         #if check passes, place an order
         if result[0] == 0:
-            print(f"Order check for {symbol} successful. Placing an order")
+            logging.info(f"Order check for {symbol} successful. Placing an order")
             #place the order using recursion
             place_order(
                 order_type= order_type,
@@ -250,9 +254,9 @@ def place_order(order_type, symbol, volume, stop_loss, take_profit, comment, sto
             )
         #let user know an invalid price has been passed
         elif result[0] == 100015:
-            print(f"Invalid price for {symbol}. Price:{stop_price}")
+            logging.info(f"Invalid price for {symbol}. Price:{stop_price}")
         else:
-            print(f"Order check failed. Details: {result}")
+            logging.info(f"Order check failed. Details: {result}")
 
 
 #function to cancel an order on MT5
@@ -271,16 +275,16 @@ def cancel_order(order_number):
     #Attempt to send the order to mt5
     try:
         order_result = mt5.order_send(request)
-        print(order_result)
+        logging.info(order_result)
         if order_result[0] == 10009:
-            print(f"Order {order_number} successfully cancelled")
+            logging.info(f"Order {order_number} successfully cancelled")
             return True
         else:
-            print (f"Order {order_number} unable to be cancelled")
+            logging.info (f"Order {order_number} unable to be cancelled")
             return False
     except Exception as e:
         #This represents an issue with MT5 terminal
-        print(f"Error cancelling order {order_number}. Error: {e}")
+        logging.info(f"Error cancelling order {order_number}. Error: {e}")
         raise Exception
     
 
@@ -346,7 +350,7 @@ def get_all_open_orders(symbol):
     return positions
     
 def close_trade(symbol):
-    print(f"Closing Orders for: {symbol}")
+    logging.info(f"Take Profit: Closing Orders for: {symbol}")
     positions = mt5.positions_get(symbol=symbol)
     
     if positions:
@@ -375,8 +379,44 @@ def close_trade(symbol):
                     # Send the close order
                     result = mt5.order_send(request)
                     if result.retcode != mt5.TRADE_RETCODE_DONE:
-                        print(f"Failed to close position {position.ticket}, retcode={result.retcode}")
+                        logging.info(f"Failed to close position {position.ticket}, retcode={result.retcode}")
                     else:
-                        print(f"Position {position.ticket} closed successfully")
+                        logging.info(f"Position {position.ticket} closed successfully")
         else:
-            print("No open positions to close")
+            logging.info("No open positions to close")
+
+def stop_loss(symbol):
+    logging.info(f"Stop Loss: Closing Orders for: {symbol}")
+    positions = mt5.positions_get(symbol=symbol)
+    
+    if positions:
+        for position in positions:
+            # logging.info(f"Open position: {position.ticket}, Profit: {position.profit} , {position.volume} lots")
+            
+            #Close trade if its a buy and price is above a certain level
+            current_price = mt5.symbol_info_tick(symbol).bid if position.type == mt5.ORDER_TYPE_BUY else mt5.symbol_info_tick(symbol).ask
+            
+            if (position.profit<0):
+                    logging.info(f"Closing Position ID:{position.ticket}, made on:{position.time},  Profit Gained:{position.profit}")
+                    # Create a close request
+                    request = {
+                        "action": mt5.TRADE_ACTION_DEAL,
+                        "symbol": symbol,
+                        "volume": position.volume,
+                        "type": mt5.ORDER_TYPE_SELL if position.type == mt5.ORDER_TYPE_BUY else mt5.ORDER_TYPE_BUY,
+                        "position": position.ticket,  # Ticket number of the position to close
+                        "price": current_price,
+                        "deviation": 20,
+                        "magic": 234000,
+                        "comment": "Python script close order",
+                        "type_time": mt5.ORDER_TIME_GTC,
+                        "type_filling": mt5.ORDER_FILLING_IOC,
+                    }
+                    # Send the close order
+                    result = mt5.order_send(request)
+                    if result.retcode != mt5.TRADE_RETCODE_DONE:
+                        logging.info(f"Failed to close position {position.ticket}, retcode={result.retcode}")
+                    else:
+                        logging.info(f"Position {position.ticket} closed successfully")
+        else:
+            logging.info("No open positions to close")

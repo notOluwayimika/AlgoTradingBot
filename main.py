@@ -87,10 +87,10 @@ def start_up(project_settings):
             outcome = mt5_lib.initialize_symbol(symbol)
             #update the user
             if outcome is True:
-                print(f"symbol {symbol} initialized")
+                logging.info(f"symbol {symbol} initialized")
             else:
                 raise Exception(f"{symbol} not initialized")
-        return [True]
+        return [True, startup[1]]
     #default return false
     return [False]
 
@@ -169,6 +169,10 @@ def start_bot_gui(project_settings):
     # Create a scrolled text widget for displaying logs
     log_text = ScrolledText(log_frame, wrap=tk.WORD, state='disabled', height=20)
     log_text.pack(fill=tk.BOTH, expand=True)
+    
+     # Add a label to display the balance
+    balance_label = tk.Label(root, text="Balance: Fetching...", font=("Helvetica", 14))
+    balance_label.pack(pady=10)
 
     # Exit button
     def on_exit():
@@ -180,12 +184,19 @@ def start_bot_gui(project_settings):
         
     def get_trades():
         mt5_lib.get_all_open_orders(symbol=project_settings["mt5"]["symbols"][0])
+        
+    def stop_loss():
+        mt5_lib.stop_loss(symbol=project_settings["mt5"]["symbols"][0])
+        
 
     exit_button = tk.Button(root, text="Exit", command=on_exit)
     exit_button.pack(pady=10)
     
-    close_trade_button = tk.Button(root, text="Close Trades", command=close_trades)
+    close_trade_button = tk.Button(root, text="Take Profit", command=close_trades)
     close_trade_button.pack(padx=5, pady=10)
+    
+    stop_loss_button = tk.Button(root, text="Stop Loss", command=stop_loss)
+    stop_loss_button.pack(padx=5, pady=10)
     
     get_button =  tk.Button(root, text="Get Open Positions", command=get_trades)
     get_button.pack(padx=5, pady=10)
@@ -210,11 +221,17 @@ def start_bot_gui(project_settings):
     gui_logger.setFormatter(formatter)
     logger.addHandler(gui_logger)
 
+    def update_balance(balance):
+        """Function to fetch and update the balance periodically"""
+        balance_label.config(text=f"Balance: ${balance}")
+        # root.after(1000, update_balance(balance=balance))  # Update every 60 seconds
+    
     def bot_logic():
-        print("This is an Algorithmich Trading Bot")
+        logging.info("This is an Algorithmich Trading Bot")
         symbols = project_settings['mt5']['symbols']
         #run start up procedure
         startup = start_up(project_settings=project_settings)
+        balance_label.config(text=f"Balance: ${startup[1]}")
         #if startup successful, start trading while loop
         if startup[0]:
             #Set a variable for the current time
@@ -237,15 +254,18 @@ def start_bot_gui(project_settings):
                 #compare current time with previous time
                 if current_time != previous_time:
                     #this means that a new candle has occured
-                    print("New Candle, Trade time")
+                    logging.info("New Candle, Trade time")
                     #Update previous time so that it is given the new current time
                     previous_time = current_time
                     strategy = run_strategy(project_settings=project_settings)
+                    update_balance(balance=strategy[1])
                     # print(strategy)
+                    
                     
                 else:
                     #No new candle has occured
-                    print("No new candle, sleeping")
+                    logging.info("No new candle, sleeping")
+                    
                     time.sleep(61)
         for symbol in symbols:
             logging.info(f"Running strategy for {symbol}")
@@ -286,7 +306,7 @@ def run_strategy(project_settings):
             timeframe= timeframe,
         )
 
-    return True
+    return [True,data]
 
 
 

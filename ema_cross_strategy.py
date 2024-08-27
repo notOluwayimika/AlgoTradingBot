@@ -2,6 +2,7 @@ import mt5_lib
 import MetaTrader5 as mt5
 import logging
 import pandas as pd
+import talib as ta
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -65,13 +66,13 @@ def hybrid_strategy(symbol, timeframe):
     df['RSI'] = 100 - (100 / (1 + rs))
     
     buy_signal = (
-    df['EMA_short'].iloc[-1] > df['EMA_long'].iloc[-1] or
+    df['EMA_short'].iloc[-1] > df['EMA_long'].iloc[-1] and
     df['MACD'].iloc[-1] > df['Signal'].iloc[-1] and
     df['RSI'].iloc[-1] < 50
     )
 
     sell_signal = (
-        df['EMA_short'].iloc[-1] < df['EMA_long'].iloc[-1] or
+        df['EMA_short'].iloc[-1] < df['EMA_long'].iloc[-1] and
         df['MACD'].iloc[-1] < df['Signal'].iloc[-1] and
         df['RSI'].iloc[-1] > 50
     )
@@ -87,6 +88,9 @@ def hybrid_strategy(symbol, timeframe):
         take_profit_direction = -1
     else:
         print("No clear trading signal")
+        return
+    
+    
     
     if(buy_signal or sell_signal):
         # Get current price
@@ -111,19 +115,13 @@ def hybrid_strategy(symbol, timeframe):
         position_size = min(symbol_info.volume_max, raw_position_size)
         
         #Round position size to the nearest valid stepsize
-        position_size = max(symbol_info.volume_min, min(symbol_info.volume_max, round(position_size / symbol_info.volume_step) * symbol_info.volume_step))
+        position_size = max(symbol_info.volume_min, round(position_size / symbol_info.volume_step) * symbol_info.volume_step)
         
         # Calculate position size based on risk and stop loss distance
+        
         # Calculate Stop Loss and Take Profit prices
         stop_loss_price = tick.ask + stop_loss_direction * stop_loss_pips * point
-        take_profit_price = tick.ask + take_profit_direction * take_profit_pips * point
-        # Adjust Take Profit based on the Risk/Reward ratio
         take_profit_pips = stop_loss_pips * risk_reward_ratio
-        take_profit_price = tick.ask + take_profit_direction * take_profit_pips * point
-
-
-        # Calculate Stop Loss and Take Profit prices
-        stop_loss_price = tick.ask + stop_loss_direction * stop_loss_pips * point
         take_profit_price = tick.ask + take_profit_direction * take_profit_pips * point
 
         # Prepare the trade request
@@ -140,7 +138,6 @@ def hybrid_strategy(symbol, timeframe):
             "comment": "Algorazo Trading Bot",
             "type_time": mt5.ORDER_TIME_GTC,
             "type_filling": mt5.ORDER_FILLING_IOC,
-            "stoplimit": stop_loss_price,  # Set the stop price (optional)
         }
 
         # Execute the trade

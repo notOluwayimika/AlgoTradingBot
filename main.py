@@ -10,6 +10,42 @@ from tkinter import filedialog, messagebox
 from tkinter.scrolledtext import ScrolledText
 import subprocess
 import threading
+from datetime import datetime
+
+if not os.path.exists('logs'):
+    os.makedirs('logs')
+    
+# Generate the log filename based on the current date and time
+log_filename = datetime.now().strftime('logs/bot_logs_%Y%m%d_%H%M%S.log')
+
+#set up logging to file and to console
+logging.basicConfig(
+    filename=log_filename,
+    filemode='a',
+    datefmt="%H : %M : %S",
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(log_filename),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger()
+fh = logging.FileHandler(filename=log_filename)
+fh.setLevel(logging.DEBUG)
+logger.addHandler(fh)
+
+# Function to test logging
+def log_test_messages():
+    logger.info("Test log message: Bot started")
+    logging.warning("Test log message: Warning example")
+    logging.error("Test log message: Error example")
+    logging.info("Logging is working correctly!")
+
+
+
+# Example test
+log_test_messages()
 
 class LogWindow(tk.Tk):
     def __init__(self):
@@ -46,8 +82,7 @@ def start_bot():
 import mt5_lib
 
 
-# Set up logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 
 #function to import settings from settings.jsom
@@ -176,6 +211,10 @@ def start_bot_gui(project_settings):
 
     # Exit button
     def on_exit():
+        for handler in logger.handlers:
+            handler.flush()
+            if isinstance(handler, logging.FileHandler):
+                handler.close()
         root.quit()
         root.destroy()
         
@@ -228,6 +267,9 @@ def start_bot_gui(project_settings):
     
     def bot_logic():
         logging.info("This is an Algorithmich Trading Bot")
+        # Ensure logs are flushed explicitly
+        for handler in logging.getLogger().handlers:
+            handler.flush()
         symbols = project_settings['mt5']['symbols']
         #run start up procedure
         startup = start_up(project_settings=project_settings)
@@ -242,6 +284,9 @@ def start_bot_gui(project_settings):
             timeframe= project_settings['mt5']['timeframe']
 
             while 1:
+                # Ensure logs are flushed explicitly
+                for handler in logging.getLogger().handlers:
+                    handler.flush()
                 #Get a value for current time,  use BTCUSD as it trades 24/7
                 time_candle = mt5_lib.get_candlesticks(
                     symbol="BTCUSD",
@@ -259,6 +304,9 @@ def start_bot_gui(project_settings):
                     previous_time = current_time
                     strategy = run_strategy(project_settings=project_settings)
                     update_balance(balance=strategy[1])
+                    # Ensure logs are flushed explicitly
+                    for handler in logging.getLogger().handlers:
+                        handler.flush()
                     # print(strategy)
                     
                     
@@ -313,7 +361,7 @@ def run_strategy(project_settings):
 
 # Main function
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
+
     # Check if settings file is provided as an argument
     settings_filepath = "./settings.json"
     Settings=True

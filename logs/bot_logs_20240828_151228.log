@@ -1,0 +1,84 @@
+Test log message: Bot started
+Test log message: Warning example
+Test log message: Error example
+Logging is working correctly!
+This is an Algorithmich Trading Bot
+Metatrader Startup Successful
+symbol EURUSD initialized
+New Candle, Trade time
+Order executed successfully
+No new candle, sleeping
+Retrieving all Open Orders
+Open position ID: 746201104, Profit: 5600.0
+Open position ID: 746212117, Profit: 4800.0
+Open position ID: 746212673, Profit: 7600.0
+Open position ID: 746213254, Profit: 11400.0
+Open position ID: 746215421, Profit: -7600.0
+Open position ID: 746217847, Profit: -8600.0
+Open position ID: 746220461, Profit: -4200.0
+Open position ID: 746224030, Profit: -1200.0
+Open position ID: 746225157, Profit: 0.0
+Retrieving all Open Orders
+Open position ID: 746201104, Profit: 5600.0
+Open position ID: 746212117, Profit: 4800.0
+Open position ID: 746212673, Profit: 7600.0
+Open position ID: 746213254, Profit: 11400.0
+Open position ID: 746215421, Profit: -7600.0
+Open position ID: 746217847, Profit: -8600.0
+Open position ID: 746220461, Profit: -4200.0
+Open position ID: 746224030, Profit: -1200.0
+Open position ID: 746225157, Profit: 0.0
+Retrieving all Open Orders
+Open position ID: 746201104, Profit: 5600.0
+Open position ID: 746212117, Profit: 4800.0
+Open position ID: 746212673, Profit: 7600.0
+Open position ID: 746213254, Profit: 11400.0
+Open position ID: 746215421, Profit: -7600.0
+Open position ID: 746217847, Profit: -8600.0
+Open position ID: 746220461, Profit: -4200.0
+Open position ID: 746224030, Profit: -1200.0
+Open position ID: 746225157, Profit: 0.0
+Retrieving all Open Orders
+Open position ID: 746201104, Profit: 5600.0
+Open position ID: 746212117, Profit: 4800.0
+Open position ID: 746212673, Profit: 7600.0
+Open position ID: 746213254, Profit: 11400.0
+Open position ID: 746215421, Profit: -7600.0
+Open position ID: 746217847, Profit: -8600.0
+Open position ID: 746220461, Profit: -4200.0
+Open position ID: 746224030, Profit: -1200.0
+Open position ID: 746225157, Profit: 0.0
+Retrieving all Open Orders
+Open position ID: 746201104, Profit: 5600.0
+Open position ID: 746212117, Profit: 4800.0
+Open position ID: 746212673, Profit: 7600.0
+Open position ID: 746213254, Profit: 11400.0
+Open position ID: 746215421, Profit: -7600.0
+Open position ID: 746217847, Profit: -8600.0
+Open position ID: 746220461, Profit: -4200.0
+Open position ID: 746224030, Profit: -1200.0
+Open position ID: 746225157, Profit: 0.0
+Retrieving all Open Orders
+Open position ID: 746201104, Profit: 5600.0
+Open position ID: 746212117, Profit: 4800.0
+Open position ID: 746212673, Profit: 7600.0
+Open position ID: 746213254, Profit: 11400.0
+Open position ID: 746215421, Profit: -7600.0
+Open position ID: 746217847, Profit: -8600.0
+Open position ID: 746220461, Profit: -4200.0
+Open position ID: 746224030, Profit: -1200.0
+Open position ID: 746225157, Profit: 0.0
+Take Profit: Closing Orders for: EURUSD
+Closing Position ID:746201104, made on:1724867762,  Profit Gained:6600.0
+Position 746201104 closed successfully
+Closing Position ID:746212117, made on:1724868173,  Profit Gained:5800.0
+Position 746212117 closed successfully
+Closing Position ID:746212673, made on:1724868196,  Profit Gained:8600.0
+Position 746212673 closed successfully
+Closing Position ID:746213254, made on:1724868225,  Profit Gained:12400.0
+Position 746213254 closed successfully
+No open positions to close
+Take Profit: Closing Orders for: EURUSD
+No open positions to close
+Take Profit: Closing Orders for: EURUSD
+No open positions to close
